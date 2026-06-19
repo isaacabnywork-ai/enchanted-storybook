@@ -1,19 +1,31 @@
-import { NextResponse } from "next/server";
-import fs from "fs/promises";
-import path from "path";
+import { neon } from '@neondatabase/serverless';
+import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {
-    const dataDir = path.join(process.cwd(), "src/data");
-    const storybookRaw = await fs.readFile(path.join(dataDir, "storybookData.json"), "utf8");
-    const appRaw = await fs.readFile(path.join(dataDir, "appData.json"), "utf8");
+    const sql = neon(process.env.DATABASE_URL!);
     
-    return NextResponse.json({
-      storybookData: JSON.parse(storybookRaw),
-      appData: JSON.parse(appRaw)
-    });
+    // Auto-create table if it doesn't exist
+    await sql`
+      CREATE TABLE IF NOT EXISTS app_content (
+        id VARCHAR(50) PRIMARY KEY,
+        data JSONB NOT NULL
+      )
+    `;
+
+    const result = await sql`SELECT id, data FROM app_content`;
+    
+    let storybookData = null;
+    let appData = null;
+
+    for (const row of result) {
+      if (row.id === 'storybook') storybookData = row.data;
+      if (row.id === 'appData') appData = row.data;
+    }
+
+    return NextResponse.json({ storybookData, appData });
   } catch (error) {
-    console.error("Load Error:", error);
-    return NextResponse.json({ error: "Failed to load data" }, { status: 500 });
+    console.error("Database Load Error:", error);
+    return NextResponse.json({ error: "Failed to load database" }, { status: 500 });
   }
 }

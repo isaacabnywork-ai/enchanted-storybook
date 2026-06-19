@@ -1,6 +1,5 @@
-import { NextResponse } from "next/server";
-import fs from "fs/promises";
-import path from "path";
+import { neon } from '@neondatabase/serverless';
+import { NextResponse } from 'next/server';
 
 export async function POST(req: Request) {
   try {
@@ -14,15 +13,26 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid target" }, { status: 400 });
     }
 
-    const dataDir = path.join(process.cwd(), "src/data");
-    const fileName = target === "storybook" ? "storybookData.json" : "appData.json";
-    const filePath = path.join(dataDir, fileName);
+    const sql = neon(process.env.DATABASE_URL!);
+    
+    // Auto-create table if it doesn't exist just in case
+    await sql`
+      CREATE TABLE IF NOT EXISTS app_content (
+        id VARCHAR(50) PRIMARY KEY,
+        data JSONB NOT NULL
+      )
+    `;
 
-    await fs.writeFile(filePath, JSON.stringify(data, null, 2), "utf8");
+    // Upsert the data (cast stringified JSON to JSONB type for Neon)
+    await sql`
+      INSERT INTO app_content (id, data)
+      VALUES (${target}, ${JSON.stringify(data)}::jsonb)
+      ON CONFLICT (id) DO UPDATE SET data = EXCLUDED.data
+    `;
 
     return NextResponse.json({ success: true, message: `Successfully saved ${target}` });
   } catch (error) {
-    console.error("Save Error:", error);
+    console.error("Database Save Error:", error);
     return NextResponse.json({ error: "Failed to save data" }, { status: 500 });
   }
 }

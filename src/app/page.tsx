@@ -10,23 +10,29 @@ import SpecialDates from "@/components/SpecialDates";
 import MessageInABottle from "@/components/MessageInABottle";
 import SoundscapeToggle from "@/components/SoundscapeToggle";
 
+// Fallback local data for first-time initialization
+import localStorybookData from "@/data/storybookData.json";
+import localAppData from "@/data/appData.json";
+
 
 export default function Home() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentView, setCurrentView] = useState<AppView>("storybook");
   
   const [isLoading, setIsLoading] = useState(true);
-  const [storybookData, setStorybookData] = useState<any>(null);
-  const [appData, setAppData] = useState<any>(null);
+  const [storybookData, setStorybookData] = useState<any>(localStorybookData);
+  const [appData, setAppData] = useState<any>(localAppData);
 
   useEffect(() => {
     let mounted = true;
+    
+    // Fetch data from Neon DB
     fetch("/api/load")
       .then(res => res.json())
       .then(data => {
-        if (mounted && data.storybookData && data.appData) {
-          setStorybookData(data.storybookData);
-          setAppData(data.appData);
+        if (mounted) {
+          if (data.storybookData) setStorybookData(data.storybookData);
+          if (data.appData) setAppData(data.appData);
           setIsLoading(false);
         }
       })
@@ -34,6 +40,7 @@ export default function Home() {
         console.error("Load error:", err);
         setIsLoading(false);
       });
+      
     return () => { mounted = false; };
   }, []);
 
