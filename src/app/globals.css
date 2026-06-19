@@ -1,26 +1,322 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* ═══════════════════════════════════════════════
+   ENCHANTED STORYBOOK — Design System
+   Pastel pink, cream, gold, ivory palette
+   ═══════════════════════════════════════════════ */
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* ─── Color Palette ─── */
+  --color-blush: #f8e8e0;
+  --color-blush-light: #fdf2ed;
+  --color-cream: #fef9f4;
+  --color-ivory: #fffef8;
+  --color-gold: #d4a574;
+  --color-gold-light: #e8c9a0;
+  --color-gold-dark: #b8864e;
+  --color-rose: #e8b4b8;
+  --color-rose-dark: #c48b90;
+  --color-rose-deep: #a86b70;
+  --color-parchment: #f5ece3;
+  --color-ink: #5a3e36;
+  --color-ink-light: #7a5e56;
+  --color-ink-faint: #a08878;
+  --color-shadow: rgba(90, 62, 54, 0.15);
+  --color-overlay: rgba(248, 232, 224, 0.85);
+
+  /* ─── Typography ─── */
+  --font-heading: "Cormorant Garamond", "Georgia", serif;
+  --font-body: "Lora", "Georgia", serif;
+  --font-handwriting: "Dancing Script", cursive;
+
+  /* ─── Spacing & Sizing ─── */
+  --book-max-width: 420px;
+  --book-max-height: 680px;
+  --book-radius: 4px 12px 12px 4px;
+  --page-padding: 1.5rem;
+
+  /* ─── Shadows ─── */
+  --shadow-book: 0 8px 32px rgba(90, 62, 54, 0.2), 0 2px 8px rgba(90, 62, 54, 0.1), inset -2px 0 4px rgba(90, 62, 54, 0.05);
+  --shadow-page: 0 2px 12px rgba(90, 62, 54, 0.08);
+  --shadow-glow: 0 0 40px rgba(212, 165, 116, 0.25);
+
+  /* ─── Transitions ─── */
+  --ease-book: cubic-bezier(0.4, 0.0, 0.2, 1);
+  --ease-flip: cubic-bezier(0.645, 0.045, 0.355, 1.000);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.theme-night {
+  /* ─── Night Color Palette ─── */
+  --color-blush: #1a1b2e;
+  --color-blush-light: #23253e;
+  --color-cream: #0f101f;
+  --color-ivory: #131426;
+  --color-gold: #c39b6b;
+  --color-gold-light: #d8b78f;
+  --color-gold-dark: #8c6a41;
+  --color-rose: #64557c;
+  --color-rose-dark: #4d4061;
+  --color-rose-deep: #9d8db8;
+  --color-parchment: #1c1d30;
+  --color-ink: #e0dced;
+  --color-ink-light: #b0abc4;
+  --color-ink-faint: #747190;
+  --color-shadow: rgba(0, 0, 0, 0.4);
+  --color-overlay: rgba(15, 16, 31, 0.85);
+}
+
+/* ═══════════════════════════════════════════════
+   VIEWPORT LOCK — Prevent iOS/Android bounce
+   ═══════════════════════════════════════════════ */
+html, body {
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
+  touch-action: manipulation;
+}
+
+html {
+  background: var(--color-cream);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-cream);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* ═══════════════════════════════════════════════
+   3D BOOK SYSTEM
+   ═══════════════════════════════════════════════ */
+.book-perspective {
+  perspective: 1500px;
+  perspective-origin: center center;
+}
+
+.page-3d {
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.page-front {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform: rotateY(0deg);
+}
+
+.page-back {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform: rotateY(180deg);
+  position: absolute;
+  inset: 0;
+}
+
+/* GPU acceleration for active flip layers */
+.will-change-transform {
+  will-change: transform;
+}
+
+/* ═══════════════════════════════════════════════
+   BOOK SPINE & BINDING
+   ═══════════════════════════════════════════════ */
+.book-spine-shadow {
+  background: linear-gradient(
+    to right,
+    rgba(90, 62, 54, 0.12) 0%,
+    rgba(90, 62, 54, 0.04) 3%,
+    transparent 8%
+  );
+  pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════════
+   PAGE LIGHTING OVERLAY (shifts during flip)
+   ═══════════════════════════════════════════════ */
+.page-lighting {
+  background: linear-gradient(
+    105deg,
+    transparent 40%,
+    rgba(255, 255, 255, 0.3) 45%,
+    rgba(255, 255, 255, 0.05) 55%,
+    transparent 60%
+  );
+  pointer-events: none;
+  mix-blend-mode: soft-light;
+}
+
+/* ═══════════════════════════════════════════════
+   ORNAMENTAL DECORATIONS
+   ═══════════════════════════════════════════════ */
+.ornament-border {
+  border-image: linear-gradient(
+    135deg,
+    var(--color-gold-light) 0%,
+    var(--color-gold) 25%,
+    var(--color-gold-light) 50%,
+    var(--color-gold) 75%,
+    var(--color-gold-light) 100%
+  ) 1;
+}
+
+/* ═══════════════════════════════════════════════
+   SCROLLBAR for timeline (scoped)
+   ═══════════════════════════════════════════════ */
+.timeline-scroll {
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-gold-light) transparent;
+}
+
+.timeline-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+.timeline-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.timeline-scroll::-webkit-scrollbar-thumb {
+  background: var(--color-gold-light);
+  border-radius: 2px;
+}
+
+/* ═══════════════════════════════════════════════
+   KEYFRAME ANIMATIONS
+   ═══════════════════════════════════════════════ */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes sparkle {
+  0%, 100% { opacity: 0; transform: scale(0) rotate(0deg); }
+  50% { opacity: 1; transform: scale(1) rotate(180deg); }
+}
+
+@keyframes gentlePulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+  20%, 40%, 60%, 80% { transform: translateX(4px); }
+}
+
+@keyframes petalDrift {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.8;
+  }
+  90% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translate(var(--drift-x, 100px), var(--drift-y, 300px)) rotate(var(--drift-rot, 360deg));
+    opacity: 0;
+  }
+}
+
+/* Utility animation classes */
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s var(--ease-book) both;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s var(--ease-book) both;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  background-size: 200% 100%;
+  animation: shimmer 2s linear infinite;
+}
+
+.animate-shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+.animate-gentle-pulse {
+  animation: gentlePulse 2s ease-in-out infinite;
+}
+
+/* ═══════════════════════════════════════════════
+   GLASSMORPHISM CARD
+   ═══════════════════════════════════════════════ */
+.glass-card {
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(20px) saturate(1.2);
+  -webkit-backdrop-filter: blur(20px) saturate(1.2);
+  border: 1px solid rgba(212, 165, 116, 0.2);
+  box-shadow:
+    0 8px 32px rgba(90, 62, 54, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+/* ═══════════════════════════════════════════════
+   PARCHMENT TEXTURE (CSS-only)
+   ═══════════════════════════════════════════════ */
+.parchment {
+  background-color: var(--color-parchment);
+  background-image:
+    radial-gradient(ellipse at 20% 50%, rgba(212, 165, 116, 0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(232, 180, 184, 0.05) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, rgba(212, 165, 116, 0.04) 0%, transparent 50%);
+}
+
+/* ═══════════════════════════════════════════════
+   REDUCED MOTION — Accessibility
+   ═══════════════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .animate-float,
+  .animate-shimmer,
+  .animate-gentle-pulse {
+    animation: none !important;
+  }
 }

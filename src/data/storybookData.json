@@ -1,0 +1,98 @@
+{
+  "book": {
+    "title": "Our Enchanted Tale",
+    "subtitle": "A Fairy-Tale Adventure",
+    "password": "enchanted"
+  },
+  "pages": [
+    {
+      "id": "cover",
+      "type": "cover",
+      "title": "Our Enchanted Tale",
+      "subtitle": "Once Upon A Time...",
+      "image": "/images/storybook_cover.png"
+    },
+    {
+      "id": "inside-cover",
+      "type": "blank"
+    },
+    {
+      "id": "chapter-1",
+      "type": "chapter",
+      "title": "The Magical Woods",
+      "content": "Deep within the heart of the whispering woods, where sunlight danced through leaves of emerald and gold, two wandering souls found a path that neither had walked before. The ancient trees leaned close, their branches forming archways adorned with tiny lanterns that flickered like earthbound stars. A wooden bridge, weathered by time yet strong with memory, arched gracefully over a crystal stream that sang softly of adventures yet to come. Here, where the fireflies drew constellations in the twilight air, the first chapter of an extraordinary story began to unfold — a story written not in ink, but in heartbeats.",
+      "image": "/images/enchanted_forest.png"
+    },
+    {
+      "id": "timeline",
+      "type": "timeline",
+      "title": "Our Journey",
+      "image": "/images/storybook_timeline.png",
+      "events": [
+        {
+          "year": "Once Upon a Time",
+          "title": "The Awakening",
+          "description": "A magical encounter under a star, where hearts first aligned",
+          "icon": "✦"
+        },
+        {
+          "year": "Year 1",
+          "title": "A Shared Dream",
+          "description": "Sharing secrets and aspirations, building a path together.",
+          "icon": "🌙"
+        },
+        {
+          "year": "Year 3",
+          "title": "Adventures Unfold",
+          "description": "Exploring enchanted forests, overcoming challenges hand-in-hand.",
+          "icon": "🗝"
+        },
+        {
+          "year": "Year 5",
+          "title": "The Secret Garden",
+          "description": "Nurturing love amidst nature's bloom, finding home.",
+          "icon": "🌹"
+        },
+        {
+          "year": "Year 7",
+          "title": "Eternal Bond",
+          "description": "A pledge of love and loyalty, united forever under the moon.",
+          "icon": "💫"
+        },
+        {
+          "year": "The Future",
+          "title": "Happily Ever After",
+          "description": "A beginning, full of joy, magic, and countless adventures yet to come.",
+          "icon": "🏰"
+        }
+      ]
+    },
+    {
+      "id": "chapter-2",
+      "type": "chapter",
+      "title": "The Castle on the Hill",
+      "content": "Beyond the meadows where wildflowers swayed in gentle rhythm, the castle rose from the hilltop like a dream made stone. Its towers caught the last rays of sunset, turning each turret into a beacon of warm amber light. Rose gardens cascaded down the slopes in waves of blush and crimson, while cherry blossoms released their into the evening breeze like confetti at a celebration of forever. A winding cobblestone path, lined with ancient lampposts, led through wrought-iron gates that seemed to open not by hand, but by the weight of true intention. This was the place where every wish whispered upon a star had quietly been gathering, waiting for the perfect moment to come true.",
+      "image": "/images/storybook_castle.png"
+    },
+    {
+      "id": "letter",
+      "type": "letter",
+      "title": "A Letter For You",
+      "greeting": "My Dearest Love,",
+      "content": "In the gentle glow of twilight, my heart speaks of you. From the quiet of the forest where magic dwells, I find my soul wandering to your embrace. The stars whisper your name, and every bloom sings of our timeless dance.\n\nYou are the warmth in my dawn, the magic in my moonlight. Every page of this story is written with the ink of my devotion, every chapter a testament to the love that grows stronger with each passing season.\n\nAs you turn these pages, know that you hold not just a book, but the very essence of my heart — bound in gold, illustrated in dreams, and dedicated entirely to you.\n\nWith all my heart, I am yours, always.",
+      "signature": "— Forever Yours ♡",
+      "image": "/images/love_letter.png"
+    },
+    {
+      "id": "the-end",
+      "type": "chapter",
+      "title": "The End",
+      "content": "And so, our story continues, bound not by the pages of a book, but by the endless possibilities of tomorrow. The end of this chapter is merely the beginning of the rest of our lives.  ",
+      "image": "/images/storybook_castle.png"
+    },
+    {
+      "id": "back-cover",
+      "type": "blank"
+    }
+  ]
+}
