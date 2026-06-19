@@ -60,7 +60,7 @@ export default function RootLayout({
       lang="en"
       className={`${cormorant.variable} ${lora.variable} ${dancingScript.variable} h-full`}
     >
-      <body>{children}</body>
+      <body suppressHydrationWarning>{children}</body>
     </html>
   );
 }

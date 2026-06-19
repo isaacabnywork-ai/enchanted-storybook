@@ -1,8 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { doc, setDoc, onSnapshot } from "firebase/firestore";
-import { db } from "@/lib/firebaseConfig";
 import PasswordGate from "@/components/PasswordGate";
 import StoryBook from "@/components/StoryBook";
 import FullScreenMenu, { AppView } from "@/components/FullScreenMenu";
@@ -12,49 +10,31 @@ import SpecialDates from "@/components/SpecialDates";
 import MessageInABottle from "@/components/MessageInABottle";
 import SoundscapeToggle from "@/components/SoundscapeToggle";
 
-// Fallback local data for first-time initialization
-import localStorybookData from "@/data/storybookData.json";
-import localAppData from "@/data/appData.json";
 
 export default function Home() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentView, setCurrentView] = useState<AppView>("storybook");
   
-  const [isLoading, setIsLoading] = useState(false);
-  const [storybookData, setStorybookData] = useState<any>(localStorybookData);
-  const [appData, setAppData] = useState<any>(localAppData);
+  const [isLoading, setIsLoading] = useState(true);
+  const [storybookData, setStorybookData] = useState<any>(null);
+  const [appData, setAppData] = useState<any>(null);
 
   useEffect(() => {
-    let unsubStorybook: (() => void) | null = null;
-    let unsubApp: (() => void) | null = null;
-
-    try {
-      const storybookDocRef = doc(db, "content", "storybook");
-      const appDocRef = doc(db, "content", "appData");
-      
-      unsubStorybook = onSnapshot(storybookDocRef, (docSnap) => {
-        if (docSnap.exists()) {
-          setStorybookData(docSnap.data() as any);
-        } else {
-          setDoc(storybookDocRef, localStorybookData).catch(console.error);
+    let mounted = true;
+    fetch("/api/load")
+      .then(res => res.json())
+      .then(data => {
+        if (mounted && data.storybookData && data.appData) {
+          setStorybookData(data.storybookData);
+          setAppData(data.appData);
+          setIsLoading(false);
         }
+      })
+      .catch(err => {
+        console.error("Load error:", err);
+        setIsLoading(false);
       });
-
-      unsubApp = onSnapshot(appDocRef, (docSnap) => {
-        if (docSnap.exists()) {
-          setAppData(docSnap.data() as any);
-        } else {
-          setDoc(appDocRef, localAppData).catch(console.error);
-        }
-      });
-    } catch (err) {
-      console.error("Firestore sync error:", err);
-    }
-
-    return () => {
-      if (unsubStorybook) unsubStorybook();
-      if (unsubApp) unsubApp();
-    };
+    return () => { mounted = false; };
   }, []);
 
   if (isLoading || !storybookData || !appData) {

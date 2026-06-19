@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 
-
 interface SpecialDatesProps {
   appData: any;
 }
