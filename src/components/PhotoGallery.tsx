@@ -99,18 +99,24 @@ export default function PhotoGallery({ appData }: PhotoGalleryProps) {
 
     try {
       // Upload directly from browser to Cloudinary (no server bottleneck)
+      // Cloud name is public info — hardcoded for reliability
+      const CLOUD_NAME = "dmbzkiclm";
+      const UPLOAD_PRESET = "ml_default";
+
+      console.log("[Upload] Starting direct Cloudinary upload...");
+
       const formData = new FormData();
       formData.append("file", file);
-      formData.append("upload_preset", "ml_default");
+      formData.append("upload_preset", UPLOAD_PRESET);
       formData.append("folder", "enchanted-storybook");
 
-      const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
       const res = await fetch(
-        `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+        `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
         { method: "POST", body: formData }
       );
 
       const data = await res.json();
+      console.log("[Upload] Cloudinary response:", data);
 
       if (data.secure_url) {
         const newImages = [...(selectedImage.images || [selectedImage.src]), data.secure_url];
@@ -124,8 +130,8 @@ export default function PhotoGallery({ appData }: PhotoGalleryProps) {
         alert("Upload failed: " + (data.error?.message || JSON.stringify(data)));
       }
     } catch (err) {
-      console.error(err);
-      alert("Failed to upload image.");
+      console.error("[Upload] Exception:", err);
+      alert("Upload error: " + String(err));
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
