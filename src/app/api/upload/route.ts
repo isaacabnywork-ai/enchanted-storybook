@@ -8,6 +8,13 @@ cloudinary.config({
 });
 
 export async function POST(req: Request) {
+  // --- Debug: log env var presence (not values) ---
+  console.log("Cloudinary config check:", {
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME ? "SET" : "MISSING",
+    api_key: process.env.CLOUDINARY_API_KEY ? "SET" : "MISSING",
+    api_secret: process.env.CLOUDINARY_API_SECRET ? "SET" : "MISSING",
+  });
+
   try {
     const formData = await req.formData();
     const file = formData.get("file") as File;
@@ -27,7 +34,10 @@ export async function POST(req: Request) {
           resource_type: "image",
         },
         (error, result) => {
-          if (error || !result) return reject(error || new Error("Upload failed"));
+          if (error || !result) {
+            console.error("Cloudinary upload_stream error:", error);
+            return reject(error || new Error("Upload failed"));
+          }
           resolve(result as { secure_url: string });
         }
       );
@@ -35,8 +45,11 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json({ url: result.secure_url, success: true });
-  } catch (error) {
-    console.error("Upload error:", error);
-    return NextResponse.json({ error: "Failed to upload file." }, { status: 500 });
+  } catch (error: any) {
+    console.error("Upload error:", error?.message || error);
+    return NextResponse.json(
+      { error: "Failed to upload file.", detail: error?.message || "Unknown error" },
+      { status: 500 }
+    );
   }
 }

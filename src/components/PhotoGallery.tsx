@@ -111,7 +111,7 @@ export default function PhotoGallery({ appData }: PhotoGalleryProps) {
         saveGallery(updated);
         setSelectedImage({ ...selectedImage, images: newImages, src: newImages[0] });
       } else {
-        alert(data.error || "Upload failed");
+        alert((data.error || "Upload failed") + (data.detail ? `\n\nDetail: ${data.detail}` : ""));
       }
     } catch (err) {
       console.error(err);
