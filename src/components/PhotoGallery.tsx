@@ -93,25 +93,35 @@ export default function PhotoGallery({ appData }: PhotoGalleryProps) {
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0 || !selectedImage) return;
-    
+
     setIsUploading(true);
-    const formData = new FormData();
-    formData.append("file", e.target.files[0]);
+    const file = e.target.files[0];
 
     try {
-      const res = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
+      // Upload directly from browser to Cloudinary (no server bottleneck)
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("upload_preset", "ml_default");
+      formData.append("folder", "enchanted-storybook");
+
+      const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+      const res = await fetch(
+        `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+        { method: "POST", body: formData }
+      );
+
       const data = await res.json();
-      
-      if (data.url) {
-        const newImages = [...(selectedImage.images || [selectedImage.src]), data.url];
-        const updated = gallery.map(g => g.id === selectedImage.id ? { ...g, images: newImages, src: newImages[0] } : g);
+
+      if (data.secure_url) {
+        const newImages = [...(selectedImage.images || [selectedImage.src]), data.secure_url];
+        const updated = gallery.map(g =>
+          g.id === selectedImage.id ? { ...g, images: newImages, src: newImages[0] } : g
+        );
         saveGallery(updated);
         setSelectedImage({ ...selectedImage, images: newImages, src: newImages[0] });
       } else {
-        alert((data.error || "Upload failed") + (data.detail ? `\n\nDetail: ${data.detail}` : ""));
+        console.error("Cloudinary error:", data);
+        alert("Upload failed: " + (data.error?.message || JSON.stringify(data)));
       }
     } catch (err) {
       console.error(err);
