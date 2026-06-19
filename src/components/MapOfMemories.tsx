@@ -105,26 +105,35 @@ export default function MapOfMemories({ storybookData }: MapOfMemoriesProps) {
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
-    
+
     setIsUploading(true);
-    const formData = new FormData();
-    formData.append("file", e.target.files[0]);
+    const file = e.target.files[0];
 
     try {
-      const res = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
+      // Upload directly from browser to Cloudinary (bypasses Vercel limits)
+      const CLOUD_NAME = "dmbzkiclm";
+      const UPLOAD_PRESET = "ml_default";
+
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("upload_preset", UPLOAD_PRESET);
+      formData.append("folder", "enchanted-storybook");
+
+      const res = await fetch(
+        `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
+        { method: "POST", body: formData }
+      );
       const data = await res.json();
-      
-      if (data.url) {
-        saveEvents(events, data.url);
+
+      if (data.secure_url) {
+        saveEvents(events, data.secure_url);
       } else {
-        alert(data.error || "Upload failed");
+        console.error("Cloudinary error:", data);
+        alert("Upload failed: " + (data.error?.message || JSON.stringify(data)));
       }
     } catch (err) {
       console.error(err);
-      alert("Failed to upload image.");
+      alert("Upload error: " + String(err));
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
