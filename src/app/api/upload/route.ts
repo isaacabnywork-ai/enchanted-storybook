@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
-import { existsSync } from "fs";
+import { v2 as cloudinary } from "cloudinary";
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 export async function POST(req: Request) {
   try {
@@ -15,20 +19,22 @@ export async function POST(req: Request) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Create unique filename to prevent overwriting
-    const uniqueName = `${Date.now()}-${file.name.replace(/\s+/g, "_")}`;
-    const publicDir = path.join(process.cwd(), "public", "uploads");
-    
-    if (!existsSync(publicDir)) {
-      await mkdir(publicDir, { recursive: true });
-    }
+    // Upload to Cloudinary via upload stream
+    const result = await new Promise<{ secure_url: string }>((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          folder: "enchanted-storybook",
+          resource_type: "image",
+        },
+        (error, result) => {
+          if (error || !result) return reject(error || new Error("Upload failed"));
+          resolve(result as { secure_url: string });
+        }
+      );
+      uploadStream.end(buffer);
+    });
 
-    const filePath = path.join(publicDir, uniqueName);
-    await writeFile(filePath, buffer);
-
-    const publicUrl = `/uploads/${uniqueName}`;
-
-    return NextResponse.json({ url: publicUrl, success: true });
+    return NextResponse.json({ url: result.secure_url, success: true });
   } catch (error) {
     console.error("Upload error:", error);
     return NextResponse.json({ error: "Failed to upload file." }, { status: 500 });
