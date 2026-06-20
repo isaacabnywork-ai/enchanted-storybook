@@ -59,6 +59,35 @@ export default function SpecialDates({ appData }: SpecialDatesProps) {
     }
   };
 
+  const handleDelete = async (idToDelete: string) => {
+    if (!confirm("Are you sure you want to delete this memory?")) return;
+    
+    setIsSaving(true);
+    const updatedDates = dates.filter((d: any) => d.id !== idToDelete);
+    
+    try {
+      const res = await fetch("/api/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          target: "appData",
+          data: { ...appData, specialDates: updatedDates }
+        })
+      });
+
+      if (res.ok) {
+        setDates(updatedDates);
+      } else {
+        alert("Failed to delete the date.");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Error deleting date.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   return (
     <div className="w-full h-full bg-cream overflow-y-auto p-8 md:p-12 pb-32">
       <div className="max-w-4xl mx-auto" ref={containerRef}>
@@ -125,7 +154,18 @@ export default function SpecialDates({ appData }: SpecialDatesProps) {
             const year = date.getFullYear();
 
             return (
-              <div key={dateObj.id} className="date-card glass-card p-6 rounded-2xl flex gap-6 items-center hover:-translate-y-1 transition-transform duration-300">
+              <div key={dateObj.id} className="date-card glass-card p-6 rounded-2xl flex gap-6 items-center hover:-translate-y-1 transition-transform duration-300 relative group">
+                <button 
+                  onClick={() => handleDelete(dateObj.id)}
+                  className="absolute top-4 right-4 text-ink-faint hover:text-rose-deep opacity-0 group-hover:opacity-100 transition-opacity"
+                  title="Delete Date"
+                  disabled={isSaving}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                    <path fillRule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+                  </svg>
+                </button>
                 {/* Date Badge */}
                 <div className="flex flex-col items-center justify-center w-20 h-20 rounded-xl bg-gradient-to-br from-rose/20 to-gold/10 border border-gold/20 flex-shrink-0 shadow-inner">
                   <span className="text-sm font-semibold text-rose-deep uppercase tracking-widest">{month}</span>
