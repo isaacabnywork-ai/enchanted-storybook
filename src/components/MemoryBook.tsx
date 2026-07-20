@@ -5,12 +5,12 @@ import gsap from "gsap";
 import PageRenderer, { PageData } from "./PageRenderer";
 import { usePageFlip } from "@/hooks/usePageFlip";
 import { useParticles } from "@/hooks/useParticles";
-interface StoryBookProps {
+interface MemoryBookProps {
   pages: PageData[];
-  storybookData: { pages?: PageData[]; [key: string]: unknown };
+  storybookData: { memoryBookPages?: PageData[]; [key: string]: unknown };
 }
 
-export default function StoryBook({ pages: initialPages, storybookData }: StoryBookProps) {
+export default function MemoryBook({ pages: initialPages, storybookData }: MemoryBookProps) {
   const bookEntranceRef = useRef<HTMLDivElement>(null);
   const [pages, setPages] = useState<PageData[]>(initialPages);
   const [isEditing, setIsEditing] = useState(false);
@@ -86,7 +86,7 @@ export default function StoryBook({ pages: initialPages, storybookData }: StoryB
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           target: "storybook",
-          data: { ...storybookData, pages }
+          data: { ...storybookData, memoryBookPages: pages }
         })
       });
 
@@ -111,7 +111,7 @@ export default function StoryBook({ pages: initialPages, storybookData }: StoryB
 
   return (
     <div
-      id="storybook-container"
+      id="memorybook-container"
       className="fixed inset-0 flex items-center justify-center overflow-hidden"
       style={{
         background:
@@ -135,15 +135,51 @@ export default function StoryBook({ pages: initialPages, storybookData }: StoryB
           {isSaving ? "Saving..." : isEditing ? "Save Changes" : "✎ Edit Book"}
         </button>
         {isEditing && (
-          <button
-            onClick={() => {
-              setPages(initialPages);
-              setIsEditing(false);
-            }}
-            className="px-3 py-2 md:px-4 md:py-2 rounded-full text-ink-light hover:text-ink transition-colors text-sm"
-          >
-            Cancel
-          </button>
+          <>
+            <button
+              onClick={() => {
+                const newPageId = `mb-page-${Date.now()}`;
+                const newPages = [...pages];
+                const backCoverIndex = newPages.findIndex(p => p.id === "mb-back-cover" || p.id === "back-cover");
+                const insertIndex = backCoverIndex >= 0 ? backCoverIndex : newPages.length;
+                newPages.splice(insertIndex, 0, {
+                  id: newPageId,
+                  type: "chapter",
+                  title: "New Memory",
+                  content: "Write about this memory...",
+                  image: "https://images.unsplash.com/photo-1522383225653-ed111181a951?auto=format&fit=crop&q=80&w=1000"
+                });
+                setPages(newPages);
+              }}
+              className="px-3 py-2 md:px-4 md:py-2 rounded-full glass-card text-gold hover:bg-gold/10 transition-colors border border-gold/20 flex items-center gap-2 text-sm"
+            >
+              + Add Page
+            </button>
+            <button
+              onClick={() => {
+                if (pages.length <= 3) return; // keep at least cover and back
+                const newPages = [...pages];
+                const backCoverIndex = newPages.findIndex(p => p.id === "mb-back-cover" || p.id === "back-cover");
+                const removeIndex = backCoverIndex >= 0 ? backCoverIndex - 1 : newPages.length - 1;
+                if (removeIndex > 0) {
+                  newPages.splice(removeIndex, 1);
+                  setPages(newPages);
+                }
+              }}
+              className="px-3 py-2 md:px-4 md:py-2 rounded-full glass-card text-rose hover:bg-rose/10 transition-colors border border-rose/20 flex items-center gap-2 text-sm"
+            >
+              - Delete Last Page
+            </button>
+            <button
+              onClick={() => {
+                setPages(initialPages);
+                setIsEditing(false);
+              }}
+              className="px-3 py-2 md:px-4 md:py-2 rounded-full text-ink-light hover:text-ink transition-colors text-sm"
+            >
+              Cancel
+            </button>
+          </>
         )}
       </div>
 

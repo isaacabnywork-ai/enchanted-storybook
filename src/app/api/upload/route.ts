@@ -1,14 +1,6 @@
 import { NextResponse } from "next/server";
 import { v2 as cloudinary } from "cloudinary";
 
-// Increase body size limit for image uploads
-export const config = {
-  api: {
-    bodyParser: {
-      sizeLimit: "10mb",
-    },
-  },
-};
 
 // Extend function timeout on Vercel
 export const maxDuration = 30;
@@ -40,10 +32,11 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json({ url: result.secure_url, success: true });
-  } catch (error: any) {
-    console.error("Upload error:", error?.message || error);
+  } catch (error: unknown) {
+    const err = error as { message?: string };
+    console.error("Upload error:", err?.message || error);
     return NextResponse.json(
-      { error: "Failed to upload file.", detail: error?.message || String(error) },
+      { error: "Failed to upload file.", detail: err?.message || String(error) },
       { status: 500 }
     );
   }

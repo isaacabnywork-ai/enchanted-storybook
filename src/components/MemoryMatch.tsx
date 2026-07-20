@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import gsap from "gsap";
 
 interface MemoryMatchProps {
   images: { id: string; src: string; caption: string }[];
@@ -45,8 +44,9 @@ export default function MemoryMatch({ images, onClose }: MemoryMatchProps) {
       const j = Math.floor(Math.random() * (i + 1));
       [pairs[i], pairs[j]] = [pairs[j], pairs[i]];
     }
-
-    setCards(pairs);
+    setTimeout(() => {
+      setCards(pairs);
+    }, 0);
   }, [images]);
 
   const handleCardClick = (index: number) => {

@@ -11,7 +11,7 @@ interface DailyNote {
 }
 
 interface MessageInABottleProps {
-  appData: any;
+  appData: { dailyNotes?: DailyNote[]; [key: string]: unknown };
 }
 
 export default function MessageInABottle({ appData }: MessageInABottleProps) {
@@ -196,7 +196,7 @@ export default function MessageInABottle({ appData }: MessageInABottleProps) {
                   {formattedDate}
                 </span>
                 <p className="text-sm text-ink leading-relaxed mt-1" style={{ fontFamily: "var(--font-handwriting)", fontSize: '1.1rem' }}>
-                  "{note.message}"
+                  &quot;{note.message}&quot;
                 </p>
                 <div className="mt-3 w-12 h-px bg-gold-light/40" />
               </div>

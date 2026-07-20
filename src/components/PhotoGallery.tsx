@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 
@@ -14,7 +13,7 @@ type GalleryItem = {
 };
 
 interface PhotoGalleryProps {
-  appData: any;
+  appData: { gallery?: GalleryItem[]; [key: string]: unknown };
 }
 
 export default function PhotoGallery({ appData }: PhotoGalleryProps) {
@@ -229,6 +228,7 @@ export default function PhotoGallery({ appData }: PhotoGalleryProps) {
               onClick={() => handleOpenAlbum(img)}
             >
               <div className="relative rounded-xl overflow-hidden shadow-md transition-all duration-300 group-hover:shadow-xl group-hover:-translate-y-1 aspect-[4/3]">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={img.src}
                   alt={img.caption}
@@ -308,6 +308,7 @@ export default function PhotoGallery({ appData }: PhotoGalleryProps) {
             )}
 
             <div className="relative w-full h-full flex justify-center items-center">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img 
                 src={selectedImage.images ? selectedImage.images[carouselIndex] : selectedImage.src} 
                 alt={selectedImage.caption}
@@ -423,6 +424,7 @@ export default function PhotoGallery({ appData }: PhotoGalleryProps) {
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                     {selectedImage.images?.map((imgUrl, idx) => (
                       <div key={idx} className="relative group aspect-square rounded-xl overflow-hidden border-2 border-gold/20 shadow-sm">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={imgUrl} alt="" className="w-full h-full object-cover" />
                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
                           <button 

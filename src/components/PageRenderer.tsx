@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import ImageUploader from "./ImageUploader";
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 
@@ -81,11 +82,10 @@ function CoverPage({ page, isActive, isEditing, onChange }: PageRendererProps) {
                 onChange={e => onChange?.({...page, title: e.target.value})}
                 className="w-full p-2 mb-4 bg-cream/50 rounded border border-gold/30"
               />
-              <label className="block text-rose-deep text-sm mb-1">Image Path</label>
-              <input 
-                value={page.image || ""} 
-                onChange={e => onChange?.({...page, image: e.target.value})}
-                className="w-full p-2 bg-cream/50 rounded border border-gold/30"
+              <label className="block text-rose-deep text-sm mb-1">Image</label>
+              <ImageUploader 
+                value={page.image} 
+                onChange={(url) => onChange?.({...page, image: url})} 
               />
            </div>
         </div>
@@ -131,7 +131,17 @@ function ChapterPage({ page, isActive, isEditing, onChange }: PageRendererProps)
 
   return (
     <div className="relative w-full h-full flex flex-col overflow-hidden parchment">
-      {page.image && (
+      {isEditing && (
+        <div className="absolute top-4 left-8 right-8 z-20">
+          <label className="block text-rose-deep text-sm mb-1">Image</label>
+          <ImageUploader 
+            value={page.image} 
+            onChange={(url) => onChange?.({...page, image: url})} 
+          />
+        </div>
+      )}
+
+      {page.image && !isEditing && (
         <div className="relative w-full flex-shrink-0" style={{ height: "42%" }}>
           <Image
             src={page.image}
@@ -149,7 +159,7 @@ function ChapterPage({ page, isActive, isEditing, onChange }: PageRendererProps)
         </div>
       )}
 
-      <div ref={contentRef} className="flex-1 px-6 py-4 flex flex-col" style={{ minHeight: 0 }}>
+      <div ref={contentRef} className={`flex-1 px-6 py-4 flex flex-col ${isEditing ? 'mt-16' : ''}`} style={{ minHeight: 0 }}>
         <div data-animate className="flex items-center gap-3 mb-3">
           <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gold-light to-transparent" />
           <span className="text-gold text-xs select-none">✧</span>
@@ -158,6 +168,7 @@ function ChapterPage({ page, isActive, isEditing, onChange }: PageRendererProps)
 
         {isEditing ? (
           <input 
+            type="text"
             value={page.title || ""} 
             onChange={e => onChange?.({...page, title: e.target.value})}
             className="text-2xl text-rose-deep text-center mb-3 bg-transparent border-b border-gold/30 focus:outline-none w-full"
@@ -212,9 +223,19 @@ function TimelinePage({ page, isActive, isEditing, onChange }: PageRendererProps
   return (
     <div className="relative w-full h-full flex flex-col overflow-hidden parchment">
       <div className="px-6 pt-5 pb-2 text-center flex-shrink-0">
+        {isEditing && (
+          <div className="mb-4">
+            <label className="block text-rose-deep text-sm mb-1 text-left">Image</label>
+            <ImageUploader 
+              value={page.image} 
+              onChange={(url) => onChange?.({...page, image: url})} 
+            />
+          </div>
+        )}
         <div className="text-gold text-lg mb-1 select-none">✦</div>
         {isEditing ? (
           <input 
+            type="text"
             value={page.title || ""} 
             onChange={e => onChange?.({...page, title: e.target.value})}
             className="text-2xl text-rose-deep text-center mb-1 bg-white/60 border border-gold/50 rounded px-2 py-1 focus:outline-none w-full pointer-events-auto"
@@ -311,9 +332,9 @@ function LetterPage({ page, isActive, isEditing, onChange }: PageRendererProps) 
   useEffect(() => {
     // If editing changes to true, force open
     if (isEditing && isSealed) {
-      setIsSealed(false);
+      setTimeout(() => setIsSealed(false), 0);
     }
-  }, [isEditing]);
+  }, [isEditing, isSealed]);
 
   useEffect(() => {
     if (isActive && contentRef.current && !isEditing && !isSealed) {
@@ -401,6 +422,15 @@ function LetterPage({ page, isActive, isEditing, onChange }: PageRendererProps) 
       {/* LETTER CONTENT */}
       {!isSealed && (
         <div ref={contentRef} className="relative z-10 flex-1 flex flex-col px-7 py-6 overflow-y-auto timeline-scroll">
+          {isEditing && (
+            <div className="mb-4 w-full">
+              <label className="block text-rose-deep text-sm mb-1 text-left">Image</label>
+              <ImageUploader 
+                value={page.image} 
+                onChange={(url) => onChange?.({...page, image: url})} 
+              />
+            </div>
+          )}
           <div data-animate className="text-center mb-3">
             <div className="text-gold text-xl mb-1 select-none">✦ ✧ ✦</div>
             {isEditing ? (

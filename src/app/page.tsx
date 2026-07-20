@@ -5,7 +5,7 @@ import PasswordGate from "@/components/PasswordGate";
 import StoryBook from "@/components/StoryBook";
 import FullScreenMenu, { AppView } from "@/components/FullScreenMenu";
 import PhotoGallery from "@/components/PhotoGallery";
-import MapOfMemories from "@/components/MapOfMemories";
+import MemoryBook from "@/components/MemoryBook";
 import SpecialDates from "@/components/SpecialDates";
 import MessageInABottle from "@/components/MessageInABottle";
 import SoundscapeToggle from "@/components/SoundscapeToggle";
@@ -20,7 +20,9 @@ export default function Home() {
   const [currentView, setCurrentView] = useState<AppView>("storybook");
   
   const [isLoading, setIsLoading] = useState(true);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [storybookData, setStorybookData] = useState<any>(localStorybookData);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [appData, setAppData] = useState<any>(localAppData);
 
   useEffect(() => {
@@ -76,7 +78,7 @@ export default function Home() {
                       onClick={() => setCurrentView("bottle")}
                     >
                       <span className="text-[10px] font-bold text-gold tracking-widest uppercase mb-1" style={{ fontFamily: "var(--font-heading)" }}>Daily Thought</span>
-                      <p className="text-rose-deep text-lg" style={{ fontFamily: "var(--font-handwriting)" }}>"{appData.dailyNotes[appData.dailyNotes.length - 1].message}"</p>
+                      <p className="text-rose-deep text-lg" style={{ fontFamily: "var(--font-handwriting)" }}>&quot;{appData.dailyNotes[appData.dailyNotes.length - 1].message}&quot;</p>
                     </div>
                   </div>
                 )}
@@ -85,8 +87,8 @@ export default function Home() {
             {currentView === "gallery" && (
               <PhotoGallery appData={appData} />
             )}
-            {currentView === "timeline" && (
-              <MapOfMemories storybookData={storybookData} />
+            {currentView === "memorybook" && (
+              <MemoryBook pages={storybookData.memoryBookPages || []} storybookData={storybookData} />
             )}
             {currentView === "dates" && (
               <SpecialDates appData={appData} />

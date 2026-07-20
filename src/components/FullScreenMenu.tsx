@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 
-export type AppView = "storybook" | "gallery" | "timeline" | "dates" | "bottle";
+export type AppView = "storybook" | "gallery" | "memorybook" | "dates" | "bottle";
 
 interface FullScreenMenuProps {
   currentView: AppView;
@@ -13,7 +13,7 @@ interface FullScreenMenuProps {
 const MENU_ITEMS: { id: AppView; label: string; icon: string }[] = [
   { id: "storybook", label: "Our Story", icon: "📖" },
   { id: "gallery", label: "Photo Gallery", icon: "✨" },
-  { id: "timeline", label: "Our Journey", icon: "🧭" },
+  { id: "memorybook", label: "Memory Book", icon: "📔" },
   { id: "dates", label: "Special Dates", icon: "🗓" },
   { id: "bottle", label: "Message in a Bottle", icon: "🍾" },
 ];

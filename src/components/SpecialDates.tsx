@@ -3,13 +3,20 @@
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 
+export interface SpecialDate {
+  id: string;
+  date: string;
+  title: string;
+  description: string;
+}
+
 interface SpecialDatesProps {
-  appData: any;
+  appData: { specialDates?: SpecialDate[]; [key: string]: unknown };
 }
 
 export default function SpecialDates({ appData }: SpecialDatesProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [dates, setDates] = useState(appData.specialDates || []);
+  const [dates, setDates] = useState<SpecialDate[]>(appData.specialDates || []);
   const [isAdding, setIsAdding] = useState(false);
   const [newDate, setNewDate] = useState({ date: "", title: "", description: "" });
   const [isSaving, setIsSaving] = useState(false);
@@ -63,7 +70,7 @@ export default function SpecialDates({ appData }: SpecialDatesProps) {
     if (!confirm("Are you sure you want to delete this memory?")) return;
     
     setIsSaving(true);
-    const updatedDates = dates.filter((d: any) => d.id !== idToDelete);
+    const updatedDates = dates.filter((d: SpecialDate) => d.id !== idToDelete);
     
     try {
       const res = await fetch("/api/save", {
@@ -147,7 +154,7 @@ export default function SpecialDates({ appData }: SpecialDatesProps) {
 
         {/* Dates List */}
         <div className="space-y-6 max-w-2xl mx-auto">
-          {dates.map((dateObj: any) => {
+          {dates.map((dateObj: SpecialDate) => {
             const date = new Date(dateObj.date);
             const month = date.toLocaleString('default', { month: 'short' });
             const day = date.getDate();

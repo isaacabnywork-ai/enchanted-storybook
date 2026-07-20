@@ -94,5 +94,29 @@
       "id": "back-cover",
       "type": "blank"
     }
+  ],
+  "memoryBookPages": [
+    {
+      "id": "mb-cover",
+      "type": "cover",
+      "title": "Memory Book",
+      "subtitle": "Our special moments",
+      "image": "/images/storybook_cover.png"
+    },
+    {
+      "id": "mb-inside-cover",
+      "type": "blank"
+    },
+    {
+      "id": "mb-chapter-1",
+      "type": "chapter",
+      "title": "A Beautiful Memory",
+      "content": "A story behind the picture goes here...",
+      "image": "/images/enchanted_forest.png"
+    },
+    {
+      "id": "mb-back-cover",
+      "type": "blank"
+    }
   ]
 }
