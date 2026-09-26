@@ -462,7 +462,7 @@ function LetterPage({ page, isActive, isEditing, onChange }: PageRendererProps) 
       {!isSealed && (
         <div 
           ref={contentRef} 
-          className="relative z-10 flex-1 flex flex-col px-7 py-6 overflow-y-auto timeline-scroll" 
+          className="relative z-10 flex-1 flex flex-col px-7 py-6 pb-12 overflow-y-auto timeline-scroll" 
           style={{ minHeight: 0, touchAction: "pan-y" }} 
           onWheel={handleScrollWheel}
         >
@@ -506,11 +506,12 @@ function LetterPage({ page, isActive, isEditing, onChange }: PageRendererProps) 
             <p data-animate className="text-lg text-ink mb-3" style={{ fontFamily: "var(--font-handwriting)" }}>{page.greeting}</p>
           )}
 
-          <div data-animate className="flex-1 flex flex-col" style={{ minHeight: 0 }}>
+          {/* Letter Body Paragraphs */}
+          <div className="space-y-4 my-2">
             {isEditing ? (
               <>
                 <div 
-                  className="flex-1 w-full border border-gold/20 rounded p-2 text-sm leading-relaxed text-ink-light bg-cream/50 cursor-pointer flex items-center justify-center hover:bg-cream transition-colors"
+                  className="w-full border border-gold/20 rounded p-4 text-sm leading-relaxed text-ink-light bg-cream/50 cursor-pointer flex items-center justify-center hover:bg-cream transition-colors"
                   onClick={() => setIsFullScreenEdit(true)}
                   style={{ fontFamily: "var(--font-body)" }}
                 >
@@ -543,19 +544,20 @@ function LetterPage({ page, isActive, isEditing, onChange }: PageRendererProps) 
               </>
             ) : (
               page.content?.split("\n\n").map((paragraph, i) => (
-                <p key={i} className="text-sm text-ink-light mb-3 leading-relaxed" style={{ fontFamily: "var(--font-body)", lineHeight: 1.8 }}>
+                <p key={i} data-animate className="text-sm text-ink-light leading-relaxed" style={{ fontFamily: "var(--font-body)", lineHeight: 1.8 }}>
                   {paragraph}
                 </p>
               ))
             )}
           </div>
 
-          <div data-animate className="mt-4 text-right">
+          {/* Signature: Placed cleanly at the end of all paragraphs */}
+          <div data-animate className="mt-6 text-right">
             {isEditing ? (
               <input 
                 value={page.signature || ""} 
                 onChange={e => onChange?.({...page, signature: e.target.value})}
-                className="text-lg text-rose-deep text-right bg-white/60 border border-gold/50 rounded px-2 py-1 focus:outline-none w-full pointer-events-auto mt-4"
+                className="text-lg text-rose-deep text-right bg-white/60 border border-gold/50 rounded px-2 py-1 focus:outline-none w-full pointer-events-auto"
                 style={{ fontFamily: "var(--font-handwriting)" }}
               />
             ) : (
@@ -563,7 +565,8 @@ function LetterPage({ page, isActive, isEditing, onChange }: PageRendererProps) 
             )}
           </div>
           
-          <div data-animate className="text-center mt-3 select-none">
+          {/* Stamp: Placed at the very end of the letter */}
+          <div data-animate className="text-center mt-5 mb-4 select-none">
             <span className="text-3xl">💌</span>
           </div>
         </div>
