@@ -180,7 +180,7 @@ function ChapterPage({ page, isActive, isEditing, onChange }: PageRendererProps)
           </h2>
         )}
 
-        <div data-animate className="flex-1 overflow-y-auto timeline-scroll flex flex-col" style={{ minHeight: 0 }}>
+        <div data-animate className="flex-1 overflow-y-auto timeline-scroll flex flex-col" style={{ minHeight: 0, touchAction: "pan-y" }} onPointerDown={e => e.stopPropagation()}>
           {isEditing ? (
             <textarea
               value={page.content || ""}
@@ -253,7 +253,7 @@ function TimelinePage({ page, isActive, isEditing, onChange }: PageRendererProps
         </div>
       </div>
 
-      <div ref={contentRef} className="flex-1 px-5 py-2 overflow-y-auto timeline-scroll" style={{ minHeight: 0 }}>
+      <div ref={contentRef} className="flex-1 px-5 py-2 overflow-y-auto timeline-scroll" style={{ minHeight: 0, touchAction: "pan-y" }} onPointerDown={e => e.stopPropagation()}>
         <div className="relative">
           <div className="absolute left-[18px] top-2 bottom-2 w-[2px]" style={{ background: "linear-gradient(to bottom, transparent, var(--color-gold-light) 10%, var(--color-gold-light) 90%, transparent)" }} />
 
@@ -421,7 +421,7 @@ function LetterPage({ page, isActive, isEditing, onChange }: PageRendererProps) 
 
       {/* LETTER CONTENT */}
       {!isSealed && (
-        <div ref={contentRef} className="relative z-10 flex-1 flex flex-col px-7 py-6 overflow-y-auto timeline-scroll">
+        <div ref={contentRef} className="relative z-10 flex-1 flex flex-col px-7 py-6 overflow-y-auto timeline-scroll" style={{ touchAction: "pan-y" }} onPointerDown={e => e.stopPropagation()}>
           {isEditing && (
             <div className="mb-4 w-full">
               <label className="block text-rose-deep text-sm mb-1 text-left">Image</label>

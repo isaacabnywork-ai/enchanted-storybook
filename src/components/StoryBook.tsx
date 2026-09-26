@@ -18,18 +18,25 @@ export default function StoryBook({ pages: initialPages, storybookData }: StoryB
 
   // Responsive state
   const [isMobile, setIsMobile] = useState(false);
+  const [isTablet, setIsTablet] = useState(false);
 
   useEffect(() => {
-    const checkMobile = () => {
+    const checkSize = () => {
       setIsMobile(window.innerWidth < 768);
+      setIsTablet(window.innerWidth >= 768 && window.innerWidth < 1024);
     };
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
+    checkSize();
+    window.addEventListener("resize", checkSize);
+    return () => window.removeEventListener("resize", checkSize);
   }, []);
 
-  // Calculate leaves. Every 2 pages is 1 leaf on Desktop. Every 1 page is 1 leaf on Mobile.
-  const leavesCount = isMobile ? pages.length : Math.ceil(pages.length / 2);
+  // On mobile/tablet, filter out blank pages so they don't appear as empty screens
+  const displayPages = (isMobile || isTablet)
+    ? pages.filter(p => p.type !== "blank")
+    : pages;
+
+  // Calculate leaves. Every 2 pages is 1 leaf on Desktop. Every 1 page is 1 leaf on Mobile/Tablet.
+  const leavesCount = (isMobile || isTablet) ? displayPages.length : Math.ceil(displayPages.length / 2);
   
   const {
     flippedCount,
@@ -106,8 +113,8 @@ export default function StoryBook({ pages: initialPages, storybookData }: StoryB
   // Derived indices for Flat Desktop View
   const leftPageIndex = flippedCount > 0 ? (flippedCount - 1) * 2 + 1 : -1;
   const rightPageIndex = flippedCount * 2;
-  const leftPage = leftPageIndex >= 0 ? pages[leftPageIndex] : null;
-  const rightPage = rightPageIndex < pages.length ? pages[rightPageIndex] : null;
+  const leftPage = leftPageIndex >= 0 ? displayPages[leftPageIndex] : null;
+  const rightPage = rightPageIndex < displayPages.length ? displayPages[rightPageIndex] : null;
 
   return (
     <div
@@ -199,10 +206,10 @@ export default function StoryBook({ pages: initialPages, storybookData }: StoryB
         
         /* 3D BOOK VIEW (Used for Mobile Read/Edit, and Desktop Read) */
         (
-          <div className={`relative book-perspective flex justify-center items-center w-full ${isMobile ? "max-w-[420px] aspect-[420/680]" : "max-w-[840px] aspect-[840/680]"} max-h-[85vh]`}>
+          <div className={`relative book-perspective flex justify-center items-center w-full ${(isMobile || isTablet) ? "max-w-[420px] aspect-[420/680]" : "max-w-[840px] aspect-[840/680]"} max-h-[85vh]`}>
             
             {/* Book shadow */}
-            {!isMobile && (
+            {!isMobile && !isTablet && (
               <div
                 className="absolute -bottom-6 left-8 right-8 h-12 rounded-full z-0 transition-all duration-500"
                 style={{
@@ -216,7 +223,7 @@ export default function StoryBook({ pages: initialPages, storybookData }: StoryB
             )}
 
             {/* Spine Binding Background */}
-            {!isMobile && (
+            {!isMobile && !isTablet && (
               <div 
                 className="absolute top-0 bottom-0 left-1/2 w-16 -ml-8 rounded-sm z-0"
                 style={{
@@ -238,13 +245,13 @@ export default function StoryBook({ pages: initialPages, storybookData }: StoryB
               onPointerDown={handlePointerDown}
               onPointerUp={handlePointerUp}
               onKeyDown={handleKeyDown}
-              className={`relative w-full h-full outline-none z-10 touch-pan-y ${isEditing ? "" : "select-none cursor-grab active:cursor-grabbing"}`}
+              className={`relative w-full h-full outline-none z-10 ${isEditing ? "" : "select-none cursor-grab active:cursor-grabbing"}`}
             >
               {Array.from({ length: leavesCount }).map((_, leafIndex) => {
-                const frontPageIndex = isMobile ? leafIndex : leafIndex * 2;
-                const backPageIndex = isMobile ? -1 : leafIndex * 2 + 1;
-                const frontPage = pages[frontPageIndex];
-                const backPage = backPageIndex >= 0 ? pages[backPageIndex] : null;
+                const frontPageIndex = (isMobile || isTablet) ? leafIndex : leafIndex * 2;
+                const backPageIndex = (isMobile || isTablet) ? -1 : leafIndex * 2 + 1;
+                const frontPage = displayPages[frontPageIndex];
+                const backPage = backPageIndex >= 0 ? displayPages[backPageIndex] : null;
                 
                 const isFlipped = leafIndex < flippedCount;
                 const zIndex = isFlipped ? leafIndex : leavesCount - leafIndex; 
@@ -256,7 +263,7 @@ export default function StoryBook({ pages: initialPages, storybookData }: StoryB
                   <div
                     key={`leaf-${leafIndex}`}
                     data-leaf={leafIndex}
-                    className={`absolute top-0 bottom-0 right-0 page-3d will-change-transform ${isMobile ? "w-full" : "w-1/2"}`}
+                    className={`absolute top-0 bottom-0 right-0 page-3d will-change-transform ${(isMobile || isTablet) ? "w-full" : "w-1/2"}`}
                     style={{
                       transformOrigin: "left center",
                       zIndex,
@@ -268,7 +275,7 @@ export default function StoryBook({ pages: initialPages, storybookData }: StoryB
                       <div 
                         className="absolute inset-0 page-front"
                         style={{
-                          borderRadius: isMobile ? "12px" : "0 12px 12px 0",
+                          borderRadius: (isMobile || isTablet) ? "12px" : "0 12px 12px 0",
                           boxShadow: isFlipped ? "none" : "inset 4px 0 10px rgba(0,0,0,0.05), var(--shadow-page)",
                           backgroundColor: "var(--color-cream)", 
                         }}
@@ -279,10 +286,10 @@ export default function StoryBook({ pages: initialPages, storybookData }: StoryB
                           isEditing={isEditing}
                           onChange={(updatedPage) => handlePageChange(frontPage.id, updatedPage)}
                         />
-                        {!isMobile && (
+                        {!isMobile && !isTablet && (
                           <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-[rgba(0,0,0,0.1)] to-transparent pointer-events-none" />
                         )}
-                        <div className={`leaf-shadow absolute inset-0 bg-black pointer-events-none opacity-0 ${isMobile ? "rounded-xl" : "rounded-r-xl"}`} />
+                        <div className={`leaf-shadow absolute inset-0 bg-black pointer-events-none opacity-0 ${(isMobile || isTablet) ? "rounded-xl" : "rounded-r-xl"}`} />
                       </div>
                     )}
 
@@ -290,7 +297,7 @@ export default function StoryBook({ pages: initialPages, storybookData }: StoryB
                     <div 
                       className="absolute inset-0 page-back"
                       style={{
-                        borderRadius: isMobile ? "12px" : "12px 0 0 12px",
+                        borderRadius: (isMobile || isTablet) ? "12px" : "12px 0 0 12px",
                         boxShadow: !isFlipped ? "none" : "inset -4px 0 10px rgba(0,0,0,0.05), var(--shadow-page)",
                         backgroundColor: "var(--color-cream)", 
                       }}
@@ -310,7 +317,7 @@ export default function StoryBook({ pages: initialPages, storybookData }: StoryB
                           </span>
                         </div>
                       )}
-                      {!isMobile && (
+                      {!isMobile && !isTablet && (
                         <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-[rgba(0,0,0,0.1)] to-transparent pointer-events-none" />
                       )}
                       <div className="leaf-shadow absolute inset-0 bg-black pointer-events-none opacity-0 rounded-l-xl" />
@@ -343,7 +350,7 @@ export default function StoryBook({ pages: initialPages, storybookData }: StoryB
               className="text-sm font-semibold text-ink-faint min-w-[80px] text-center"
               style={{ fontFamily: "var(--font-heading)" }}
             >
-              {isMobile 
+              {(isMobile || isTablet)
                 ? `${flippedCount + 1} / ${leavesCount}`
                 : (flippedCount === 0 ? "Cover" : flippedCount === leavesCount ? "End" : `Spread ${flippedCount}`)
               }
