@@ -75,7 +75,6 @@ html, body {
   height: 100%;
   overscroll-behavior: none;
   -webkit-overflow-scrolling: touch;
-  touch-action: manipulation;
 }
 
 html {
@@ -89,8 +88,6 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -webkit-tap-highlight-color: transparent;
-  user-select: none;
-  -webkit-user-select: none;
 }
 
 /* ═══════════════════════════════════════════════
@@ -124,6 +121,17 @@ body {
 /* GPU acceleration for active flip layers */
 .will-change-transform {
   will-change: transform;
+}
+
+/* On mobile/tablet, disable 3D preserve so scrolling works inside pages */
+@media (max-width: 1023px) {
+  .page-3d {
+    transform-style: flat;
+  }
+  .page-front,
+  .page-back {
+    transform-style: flat;
+  }
 }
 
 /* ═══════════════════════════════════════════════
@@ -173,6 +181,9 @@ body {
    ═══════════════════════════════════════════════ */
 .timeline-scroll {
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  overscroll-behavior-y: contain;
   scrollbar-width: thin;
   scrollbar-color: var(--color-gold-light) transparent;
 }
