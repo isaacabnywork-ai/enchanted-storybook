@@ -123,15 +123,9 @@ body {
   will-change: transform;
 }
 
-/* On mobile/tablet, disable 3D preserve so scrolling works inside pages */
-@media (max-width: 1023px) {
-  .page-3d {
-    transform-style: flat;
-  }
-  .page-front,
-  .page-back {
-    transform-style: flat;
-  }
+.page-front,
+.page-back {
+  transform-style: preserve-3d;
 }
 
 /* ═══════════════════════════════════════════════
@@ -177,7 +171,7 @@ body {
 }
 
 /* ═══════════════════════════════════════════════
-   SCROLLBAR for timeline (scoped)
+   SCROLLBAR for timeline & long content (scoped)
    ═══════════════════════════════════════════════ */
 .timeline-scroll {
   overflow-y: auto;
@@ -185,20 +179,25 @@ body {
   touch-action: pan-y;
   overscroll-behavior-y: contain;
   scrollbar-width: thin;
-  scrollbar-color: var(--color-gold-light) transparent;
+  scrollbar-color: var(--color-gold) transparent;
 }
 
 .timeline-scroll::-webkit-scrollbar {
-  width: 4px;
+  width: 6px;
 }
 
 .timeline-scroll::-webkit-scrollbar-track {
-  background: transparent;
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 4px;
 }
 
 .timeline-scroll::-webkit-scrollbar-thumb {
-  background: var(--color-gold-light);
-  border-radius: 2px;
+  background: var(--color-gold);
+  border-radius: 4px;
+}
+
+.timeline-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--color-gold-dark);
 }
 
 /* ═══════════════════════════════════════════════

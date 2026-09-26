@@ -46,6 +46,8 @@ export default function StoryBook({ pages: initialPages, storybookData }: StoryB
     flipBackward,
     handlePointerDown,
     handlePointerUp,
+    handleTouchStart,
+    handleTouchEnd,
     handleKeyDown,
   } = usePageFlip({
     totalLeaves: leavesCount,
@@ -244,8 +246,10 @@ export default function StoryBook({ pages: initialPages, storybookData }: StoryB
               tabIndex={0}
               onPointerDown={handlePointerDown}
               onPointerUp={handlePointerUp}
+              onTouchStart={handleTouchStart}
+              onTouchEnd={handleTouchEnd}
               onKeyDown={handleKeyDown}
-              className={`relative w-full h-full outline-none z-10 ${isEditing ? "" : "select-none cursor-grab active:cursor-grabbing"}`}
+              className={`relative w-full h-full outline-none z-10 touch-pan-y ${isEditing ? "" : "cursor-grab active:cursor-grabbing"}`}
             >
               {Array.from({ length: leavesCount }).map((_, leafIndex) => {
                 const frontPageIndex = (isMobile || isTablet) ? leafIndex : leafIndex * 2;
@@ -254,10 +258,11 @@ export default function StoryBook({ pages: initialPages, storybookData }: StoryB
                 const backPage = backPageIndex >= 0 ? displayPages[backPageIndex] : null;
                 
                 const isFlipped = leafIndex < flippedCount;
-                const zIndex = isFlipped ? leafIndex : leavesCount - leafIndex; 
+                const zIndex = isFlipped ? leafIndex + 1 : leavesCount - leafIndex; 
 
                 const isFrontActive = !isFlipped && leafIndex === flippedCount && !isFlipping;
-                const isBackActive = !isMobile && isFlipped && leafIndex === flippedCount - 1 && !isFlipping;
+                const isBackActive = !isMobile && !isTablet && isFlipped && leafIndex === flippedCount - 1 && !isFlipping;
+                const isLeafInteractive = leafIndex === flippedCount || (!isMobile && !isTablet && leafIndex === flippedCount - 1);
 
                 return (
                   <div
@@ -267,6 +272,7 @@ export default function StoryBook({ pages: initialPages, storybookData }: StoryB
                     style={{
                       transformOrigin: "left center",
                       zIndex,
+                      pointerEvents: isLeafInteractive ? "auto" : "none",
                       transform: `rotateY(${isFlipped ? -180 : 0}deg) translateZ(${zIndex}px)`
                     }}
                   >
@@ -278,6 +284,8 @@ export default function StoryBook({ pages: initialPages, storybookData }: StoryB
                           borderRadius: (isMobile || isTablet) ? "12px" : "0 12px 12px 0",
                           boxShadow: isFlipped ? "none" : "inset 4px 0 10px rgba(0,0,0,0.05), var(--shadow-page)",
                           backgroundColor: "var(--color-cream)", 
+                          pointerEvents: (!isFlipped && isFrontActive) ? "auto" : "none",
+                          visibility: isFlipped ? "hidden" : "visible",
                         }}
                       >
                         <PageRenderer
@@ -300,6 +308,8 @@ export default function StoryBook({ pages: initialPages, storybookData }: StoryB
                         borderRadius: (isMobile || isTablet) ? "12px" : "12px 0 0 12px",
                         boxShadow: !isFlipped ? "none" : "inset -4px 0 10px rgba(0,0,0,0.05), var(--shadow-page)",
                         backgroundColor: "var(--color-cream)", 
+                        pointerEvents: (isFlipped && isBackActive) ? "auto" : "none",
+                        visibility: !isFlipped ? "hidden" : "visible",
                       }}
                     >
                       {backPage ? (

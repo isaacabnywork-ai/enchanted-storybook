@@ -112,6 +112,12 @@ function CoverPage({ page, isActive, isEditing, onChange }: PageRendererProps) {
   );
 }
 
+/* Helper to guarantee wheel scroll on desktop/laptop inside 3D transforms */
+const handleScrollWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+  e.stopPropagation();
+  e.currentTarget.scrollTop += e.deltaY;
+};
+
 /* ═══════════════════════════════════════════════
    CHAPTER PAGE
    ═══════════════════════════════════════════════ */
@@ -124,7 +130,15 @@ function ChapterPage({ page, isActive, isEditing, onChange }: PageRendererProps)
       gsap.fromTo(
         els,
         { opacity: 0, y: 15 },
-        { opacity: 1, y: 0, stagger: 0.12, duration: 0.5, ease: "power2.out", delay: 0.4 }
+        { 
+          opacity: 1, 
+          y: 0, 
+          stagger: 0.12, 
+          duration: 0.5, 
+          ease: "power2.out", 
+          delay: 0.4,
+          clearProps: "transform",
+        }
       );
     }
   }, [isActive, isEditing]);
@@ -180,7 +194,11 @@ function ChapterPage({ page, isActive, isEditing, onChange }: PageRendererProps)
           </h2>
         )}
 
-        <div data-animate className="flex-1 overflow-y-auto timeline-scroll flex flex-col" style={{ minHeight: 0, touchAction: "pan-y" }} onPointerDown={e => e.stopPropagation()}>
+        <div 
+          className="flex-1 overflow-y-auto timeline-scroll flex flex-col" 
+          style={{ minHeight: 0, touchAction: "pan-y" }} 
+          onWheel={handleScrollWheel}
+        >
           {isEditing ? (
             <textarea
               value={page.content || ""}
@@ -189,7 +207,7 @@ function ChapterPage({ page, isActive, isEditing, onChange }: PageRendererProps)
               style={{ fontFamily: "var(--font-body)", lineHeight: 1.8 }}
             />
           ) : (
-            <p className="text-sm leading-relaxed text-ink-light text-justify" style={{ fontFamily: "var(--font-body)", lineHeight: 1.8 }}>
+            <p data-animate className="text-sm leading-relaxed text-ink-light text-justify" style={{ fontFamily: "var(--font-body)", lineHeight: 1.8 }}>
               {page.content}
             </p>
           )}
@@ -215,7 +233,15 @@ function TimelinePage({ page, isActive, isEditing, onChange }: PageRendererProps
       gsap.fromTo(
         items,
         { opacity: 0, x: -20 },
-        { opacity: 1, x: 0, stagger: 0.12, duration: 0.5, ease: "power2.out", delay: 0.3 }
+        { 
+          opacity: 1, 
+          x: 0, 
+          stagger: 0.12, 
+          duration: 0.5, 
+          ease: "power2.out", 
+          delay: 0.3,
+          clearProps: "transform",
+        }
       );
     }
   }, [isActive, isEditing]);
@@ -253,7 +279,12 @@ function TimelinePage({ page, isActive, isEditing, onChange }: PageRendererProps
         </div>
       </div>
 
-      <div ref={contentRef} className="flex-1 px-5 py-2 overflow-y-auto timeline-scroll" style={{ minHeight: 0, touchAction: "pan-y" }} onPointerDown={e => e.stopPropagation()}>
+      <div 
+        ref={contentRef} 
+        className="flex-1 px-5 py-2 overflow-y-auto timeline-scroll" 
+        style={{ minHeight: 0, touchAction: "pan-y" }} 
+        onWheel={handleScrollWheel}
+      >
         <div className="relative">
           <div className="absolute left-[18px] top-2 bottom-2 w-[2px]" style={{ background: "linear-gradient(to bottom, transparent, var(--color-gold-light) 10%, var(--color-gold-light) 90%, transparent)" }} />
 
@@ -342,7 +373,15 @@ function LetterPage({ page, isActive, isEditing, onChange }: PageRendererProps) 
       gsap.fromTo(
         els,
         { opacity: 0, y: 10 },
-        { opacity: 1, y: 0, stagger: 0.1, duration: 0.6, ease: "power2.out", delay: 0.2 }
+        { 
+          opacity: 1, 
+          y: 0, 
+          stagger: 0.1, 
+          duration: 0.6, 
+          ease: "power2.out", 
+          delay: 0.2,
+          clearProps: "transform",
+        }
       );
     }
   }, [isActive, isEditing, isSealed]);
@@ -421,7 +460,12 @@ function LetterPage({ page, isActive, isEditing, onChange }: PageRendererProps) 
 
       {/* LETTER CONTENT */}
       {!isSealed && (
-        <div ref={contentRef} className="relative z-10 flex-1 flex flex-col px-7 py-6 overflow-y-auto timeline-scroll" style={{ touchAction: "pan-y" }} onPointerDown={e => e.stopPropagation()}>
+        <div 
+          ref={contentRef} 
+          className="relative z-10 flex-1 flex flex-col px-7 py-6 overflow-y-auto timeline-scroll" 
+          style={{ minHeight: 0, touchAction: "pan-y" }} 
+          onWheel={handleScrollWheel}
+        >
           {isEditing && (
             <div className="mb-4 w-full">
               <label className="block text-rose-deep text-sm mb-1 text-left">Image</label>

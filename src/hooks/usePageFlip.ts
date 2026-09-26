@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 
 interface UsePageFlipOptions {
@@ -27,8 +27,27 @@ export function usePageFlip({ totalLeaves, onFlip }: UsePageFlipOptions) {
   });
 
   const FLIP_DURATION = 0.9;
-  const SWIPE_THRESHOLD = 40;
-  const VELOCITY_THRESHOLD = 0.25;
+  const SWIPE_THRESHOLD = 35;
+  const VELOCITY_THRESHOLD = 0.2;
+
+  // Sync leaf rotation state with flippedCount
+  useEffect(() => {
+    if (isFlipping) return;
+    const book = bookRef.current;
+    if (!book) return;
+
+    const leaves = book.querySelectorAll<HTMLElement>("[data-leaf]");
+    leaves.forEach((leaf) => {
+      const idx = parseInt(leaf.getAttribute("data-leaf") || "-1", 10);
+      if (idx >= 0) {
+        if (idx < flippedCount) {
+          gsap.set(leaf, { rotateY: -180, zIndex: idx + 1 });
+        } else {
+          gsap.set(leaf, { rotateY: 0, zIndex: totalLeaves - idx });
+        }
+      }
+    });
+  }, [flippedCount, totalLeaves, isFlipping]);
 
   const flipForward = useCallback(() => {
     if (isFlipping || flippedCount >= totalLeaves) return;
@@ -126,11 +145,19 @@ export function usePageFlip({ totalLeaves, onFlip }: UsePageFlipOptions) {
     }
   }, [isFlipping, flippedCount, totalLeaves, onFlip]);
 
-  // ─── Swipe & Tap Gesture Detection ───
+  // ─── Swipe & Tap Gesture Detection (Pointer Events for Mouse/Laptop) ───
 
   const handlePointerDown = useCallback(
     (e: React.PointerEvent) => {
       if (isFlipping) return;
+      // Ignore touch pointers here so touch events handle mobile cleanly
+      if (e.pointerType === "touch") return;
+
+      const target = e.target as HTMLElement;
+      if (target.closest("button, input, textarea, a, .cursor-pointer, .interactive")) {
+        return;
+      }
+
       swipeRef.current = {
         startX: e.clientX,
         startY: e.clientY,
@@ -143,39 +170,98 @@ export function usePageFlip({ totalLeaves, onFlip }: UsePageFlipOptions) {
 
   const handlePointerUp = useCallback(
     (e: React.PointerEvent) => {
+      if (e.pointerType === "touch") return;
       const swipe = swipeRef.current;
       if (!swipe.isTracking) return;
       swipe.isTracking = false;
 
       const deltaX = e.clientX - swipe.startX;
       const deltaY = e.clientY - swipe.startY;
-      const elapsed = Date.now() - swipe.startTime;
+      const elapsed = Math.max(Date.now() - swipe.startTime, 1);
       const velocity = Math.abs(deltaX) / elapsed;
 
-      // Horizontal swipe
-      if (Math.abs(deltaX) > Math.abs(deltaY) * 1.2) {
-        if (
-          Math.abs(deltaX) > SWIPE_THRESHOLD ||
-          velocity > VELOCITY_THRESHOLD
-        ) {
+      // Horizontal swipe on laptop (e.g. mouse drag)
+      if (Math.abs(deltaX) > Math.abs(deltaY) * 1.15) {
+        if (Math.abs(deltaX) > SWIPE_THRESHOLD || velocity > VELOCITY_THRESHOLD) {
           if (deltaX < 0) flipForward();
           else flipBackward();
           return;
         }
       }
 
-      // Edge tap
+      // Edge tap (clicks near the outer edges of the book)
       const target = e.target as HTMLElement;
-      if (target.closest('button, input, textarea, a, .cursor-pointer, .interactive')) {
-        return; // Don't trigger page turn if clicking an interactive element
+      if (target.closest("button, input, textarea, a, .cursor-pointer, .interactive, .timeline-scroll")) {
+        return;
       }
 
       const book = bookRef.current;
-      if (book && Math.abs(deltaX) < 10 && Math.abs(deltaY) < 10) {
+      if (book && Math.abs(deltaX) < 15 && Math.abs(deltaY) < 15) {
         const rect = book.getBoundingClientRect();
         const tapX = (e.clientX - rect.left) / rect.width;
-        if (tapX < 0.2) flipBackward();
-        else if (tapX > 0.8) flipForward();
+        if (tapX < 0.18) flipBackward();
+        else if (tapX > 0.82) flipForward();
+      }
+    },
+    [flipForward, flipBackward]
+  );
+
+  // ─── Touch Gesture Detection (Dedicated for Phone & Tablet) ───
+
+  const handleTouchStart = useCallback(
+    (e: React.TouchEvent) => {
+      if (isFlipping || e.touches.length !== 1) return;
+
+      const target = e.target as HTMLElement;
+      if (target.closest("button, input, textarea, a, .cursor-pointer, .interactive")) {
+        return;
+      }
+
+      const touch = e.touches[0];
+      swipeRef.current = {
+        startX: touch.clientX,
+        startY: touch.clientY,
+        startTime: Date.now(),
+        isTracking: true,
+      };
+    },
+    [isFlipping]
+  );
+
+  const handleTouchEnd = useCallback(
+    (e: React.TouchEvent) => {
+      const swipe = swipeRef.current;
+      if (!swipe.isTracking) return;
+      swipe.isTracking = false;
+
+      if (!e.changedTouches || e.changedTouches.length === 0) return;
+      const touch = e.changedTouches[0];
+      const deltaX = touch.clientX - swipe.startX;
+      const deltaY = touch.clientY - swipe.startY;
+      const elapsed = Math.max(Date.now() - swipe.startTime, 1);
+      const velocity = Math.abs(deltaX) / elapsed;
+
+      // Horizontal swipe: user swiped sideways to turn pages
+      if (Math.abs(deltaX) > Math.abs(deltaY) * 1.15) {
+        if (Math.abs(deltaX) > SWIPE_THRESHOLD || velocity > VELOCITY_THRESHOLD) {
+          if (deltaX < 0) flipForward();
+          else flipBackward();
+          return;
+        }
+      }
+
+      // Edge tap on mobile
+      const target = e.target as HTMLElement;
+      if (target.closest("button, input, textarea, a, .cursor-pointer, .interactive, .timeline-scroll")) {
+        return;
+      }
+
+      const book = bookRef.current;
+      if (book && Math.abs(deltaX) < 15 && Math.abs(deltaY) < 15) {
+        const rect = book.getBoundingClientRect();
+        const tapX = (touch.clientX - rect.left) / rect.width;
+        if (tapX < 0.18) flipBackward();
+        else if (tapX > 0.82) flipForward();
       }
     },
     [flipForward, flipBackward]
@@ -196,12 +282,15 @@ export function usePageFlip({ totalLeaves, onFlip }: UsePageFlipOptions) {
 
   return {
     flippedCount,
+    setFlippedCount,
     isFlipping,
     bookRef,
     flipForward,
     flipBackward,
     handlePointerDown,
     handlePointerUp,
+    handleTouchStart,
+    handleTouchEnd,
     handleKeyDown,
     totalLeaves,
   };
