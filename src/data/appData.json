@@ -1,0 +1,80 @@
+{
+  "gallery": [
+    {
+      "id": "1",
+      "src": "/images/storybook_cover.png",
+      "images": [
+        "/images/storybook_cover.png"
+      ],
+      "caption": "The beginning of everything"
+    },
+    {
+      "id": "2",
+      "src": "/images/enchanted_forest.png",
+      "images": [
+        "/images/enchanted_forest.png"
+      ],
+      "caption": "Wandering the enchanted woods"
+    },
+    {
+      "id": "3",
+      "src": "/images/storybook_castle.png",
+      "images": [
+        "/images/storybook_castle.png",
+        "/uploads/1781842876789-Screenshot_2026-06-17_at_9.25.15_AM.png"
+      ],
+      "caption": "The castle on the hill"
+    },
+    {
+      "id": "4",
+      "src": "/images/storybook_timeline.png",
+      "images": [
+        "/images/storybook_timeline.png"
+      ],
+      "caption": "Our magical timeline"
+    },
+    {
+      "id": "5",
+      "src": "/images/love_letter.png",
+      "images": [
+        "/images/love_letter.png"
+      ],
+      "caption": "A letter to remember"
+    },
+    {
+      "id": "mem-1781841833984",
+      "src": "https://images.unsplash.com/photo-1518568814500-bf0f8d125f46?auto=format&fit=crop&q=80&w=600",
+      "images": [
+        "https://images.unsplash.com/photo-1518568814500-bf0f8d125f46?auto=format&fit=crop&q=80&w=600"
+      ],
+      "caption": "New Memory (Click to edit)"
+    }
+  ],
+  "specialDates": [
+    {
+      "id": "date-1",
+      "date": "2023-05-14",
+      "title": "The First Meeting",
+      "description": "The day our paths crossed under the spring moonlight."
+    },
+    {
+      "id": "date-2",
+      "date": "2024-02-14",
+      "title": "Valentine's Magic",
+      "description": "Our first Valentine's Day together, filled with laughter and roses."
+    },
+    {
+      "id": "date-1781839525281",
+      "date": "2026-06-19",
+      "title": "Test Date",
+      "description": "A beautiful day"
+    }
+  ],
+  "dailyNotes": [
+    {
+      "id": "note-1",
+      "date": "2023-05-14T10:00:00Z",
+      "message": "Thinking of you today as the sun came up."
+    }
+  ]
+}
