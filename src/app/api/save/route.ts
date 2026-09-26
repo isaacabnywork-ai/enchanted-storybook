@@ -1,4 +1,4 @@
-import { neon } from '@neondatabase/serverless';
+import { MongoClient } from 'mongodb';
 import { NextResponse } from 'next/server';
 import fs from 'fs/promises';
 import path from 'path';
@@ -15,29 +15,27 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid target" }, { status: 400 });
     }
 
-    // If DATABASE_URL is provided, use Neon database
-    if (process.env.DATABASE_URL) {
-      const sql = neon(process.env.DATABASE_URL);
-      
-      // Auto-create table if it doesn't exist just in case
-      await sql`
-        CREATE TABLE IF NOT EXISTS app_content (
-          id VARCHAR(50) PRIMARY KEY,
-          data JSONB NOT NULL
-        )
-      `;
+    // If MONGODB_URI is provided, use MongoDB
+    if (process.env.MONGODB_URI) {
+      const client = new MongoClient(process.env.MONGODB_URI);
+      try {
+        await client.connect();
+        const db = client.db('enchanted-storybook');
+        const collection = db.collection('app_content');
 
-      // Upsert the data (cast stringified JSON to JSONB type for Neon)
-      await sql`
-        INSERT INTO app_content (id, data)
-        VALUES (${target}, ${JSON.stringify(data)}::jsonb)
-        ON CONFLICT (id) DO UPDATE SET data = EXCLUDED.data
-      `;
+        await collection.updateOne(
+          { _id: target as unknown as never },
+          { $set: { _id: target as unknown as never, data } },
+          { upsert: true }
+        );
 
-      return NextResponse.json({ success: true, message: `Successfully saved ${target}` });
+        return NextResponse.json({ success: true, message: `Successfully saved ${target}` });
+      } finally {
+        await client.close();
+      }
     }
 
-    // Local file fallback for development or offline usage
+    // Local file fallback for development
     const filename = target === "storybook" ? "storybookData.json" : "appData.json";
     const filePath = path.join(process.cwd(), 'src', 'data', filename);
 
