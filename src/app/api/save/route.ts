@@ -17,21 +17,29 @@ export async function POST(req: Request) {
 
     // If MONGODB_URI is provided, use MongoDB
     if (process.env.MONGODB_URI) {
-      const client = new MongoClient(process.env.MONGODB_URI);
+      let client: MongoClient | null = null;
       try {
+        client = new MongoClient(process.env.MONGODB_URI, {
+          serverSelectionTimeoutMS: 10000,
+          connectTimeoutMS: 10000,
+        });
         await client.connect();
         const db = client.db('enchanted-storybook');
         const collection = db.collection('app_content');
 
         await collection.updateOne(
           { _id: target as unknown as never },
-          { $set: { _id: target as unknown as never, data } },
+          { $set: { data } },
           { upsert: true }
         );
 
         return NextResponse.json({ success: true, message: `Successfully saved ${target}` });
+      } catch (dbError: unknown) {
+        const message = dbError instanceof Error ? dbError.message : String(dbError);
+        console.error("MongoDB Save Error:", message);
+        return NextResponse.json({ error: `Database error: ${message}` }, { status: 500 });
       } finally {
-        await client.close();
+        if (client) await client.close();
       }
     }
 
@@ -43,7 +51,8 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ success: true, message: `Successfully saved ${target} locally` });
   } catch (error) {
-    console.error("Save Error:", error);
-    return NextResponse.json({ error: "Failed to save data" }, { status: 500 });
+    const message = error instanceof Error ? error.message : String(error);
+    console.error("Save Error:", message);
+    return NextResponse.json({ error: `Failed to save data: ${message}` }, { status: 500 });
   }
 }
